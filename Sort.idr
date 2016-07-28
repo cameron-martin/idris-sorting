@@ -27,7 +27,7 @@ abc2 {to} {x} {y} prf' xNeqY (IsSortedMany {prf} _ _) = xNeqY (antisymmetric {po
 decideSorted : (Ordered e to, DecEq e) => (xs : Vect n e) -> Dec (IsSorted to xs)
 decideSorted [] = Yes IsSortedZero
 decideSorted (x :: []) = Yes (IsSortedOne x)
-decideSorted {to} (x :: (y :: xs)) = case (decideSorted {to} (y :: xs), order {to} x y, decEq x y) of
+decideSorted {to} (x :: y :: xs) = case (decideSorted {to} (y :: xs), order {to} x y, decEq x y) of
                                      (Yes sorted, Left  order, _           ) => Yes (IsSortedMany {prf=order} x sorted)
                                      (Yes sorted, Right order, Yes equal   ) => Yes (abc order equal sorted)
                                      (Yes _,      Right order, No notSorted) => No  (abc2 order notSorted)
