@@ -30,7 +30,7 @@ decideSorted (x :: []) = Yes (IsSortedOne x)
 decideSorted {to} (x :: y :: xs) = case (decideSorted {to} (y :: xs), order {to} x y, decEq x y) of
                                      (Yes sorted, Left  order, _           ) => Yes (IsSortedMany {prf=order} x sorted)
                                      (Yes sorted, Right order, Yes equal   ) => Yes (abc order equal sorted)
-                                     (Yes _,      Right order, No notSorted) => No  (abc2 order notSorted)
+                                     (Yes _,      Right order, No notEqual ) => No  (abc2 order notEqual)
                                      (No prf1,    _,           _           ) => No  (prf1 . tailSorted)
 
 
