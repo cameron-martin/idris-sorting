@@ -6,16 +6,16 @@ import Data.Vect
 
 %default total
 
-data IsSorted : (to : a -> a -> Type) -> (xs : Vect n e) -> Type where
+data IsSorted : (to : e -> e -> Type) -> (xs : Vect n e) -> Type where
   IsSortedZero : IsSorted to Nil
   IsSortedOne : {x : e} -> IsSorted to (x::Nil)
   IsSortedMany : (Ordered e to) => {x : e} -> {y : e} -> {ys : Vect n'' e} ->
                  {auto prf : to x y} -> IsSorted to (y :: ys) -> IsSorted to (x :: y :: ys)
-                 
+
 data Forall : (e -> Type) -> (xs : Vect n e) -> Type where
   ForallNone : Forall p []
   ForallAnd : p x -> Forall p xs -> Forall p (x :: xs)
-  
+
 data Contains : Vect n e -> e -> Type where
   Here : Contains (x :: _) x
   There : Contains xs y -> Contains (x :: xs) y
@@ -33,8 +33,8 @@ tailSorted (IsSortedMany x) = x
 equalityImpliesOrder : (Ordered e to) => x = y -> to x y
 equalityImpliesOrder {y} xEqY = rewrite xEqY in (reflexive y)
 
-abc : Ordered e to => to y x -> x = y -> IsSorted to (y :: xs) -> IsSorted to (x :: y :: xs)
-abc {to} _ equal tailSorted = IsSortedMany {to} {prf=equalityImpliesOrder equal} tailSorted
+abc : Ordered e to => x = y -> IsSorted to (y :: xs) -> IsSorted to (x :: y :: xs)
+abc {to} equal tailSorted = IsSortedMany {to} {prf=equalityImpliesOrder equal} tailSorted
 
 abc2 : Ordered e to => to y x -> (x = y -> Void) -> IsSorted to (x :: y :: xs) -> Void
 abc2 {to} {x} {y} prf' xNeqY (IsSortedMany {prf} _) = xNeqY (antisymmetric {po=to} x y prf prf')
@@ -44,8 +44,8 @@ decideSorted [] = Yes IsSortedZero
 decideSorted (x :: []) = Yes (IsSortedOne)
 decideSorted {to} (x :: y :: xs) = case (decideSorted {to} (y :: xs), order {to} x y, decEq x y) of
                                      (Yes sorted, Left  order, _           ) => Yes (IsSortedMany {prf=order} sorted)
-                                     (Yes sorted, Right order, Yes equal   ) => Yes (abc order equal sorted)
-                                     (Yes _,      Right order, No notSorted) => No  (abc2 order notSorted)
+                                     (Yes sorted, Right order, Yes equal   ) => Yes (abc equal sorted)
+                                     (Yes _,      Right order, No notEqual ) => No  (abc2 order notEqual)
                                      (No prf1,    _,           _           ) => No  (prf1 . tailSorted)
 
 
